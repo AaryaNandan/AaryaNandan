@@ -1,0 +1,136 @@
+#include <stdio.h>  
+
+#define MAX_ITEMS 5  
+#define MAX_ORDERS 10  
+
+// Structure for FoodItem  
+typedef struct {  
+    int id;  
+    char name[30];  
+    float price;  
+} FoodItem;  
+
+// Structure for Order  
+typedef struct {  
+    int foodItemId;  
+    int quantity;  
+} Order;  
+
+// Function declarations  
+void displayMenu(FoodItem menu[], int menuSize);  
+void placeOrder(Order orders[], int *orderCount, FoodItem menu[], int menuSize);  
+void displayCurrentOrders(Order orders[], int orderCount, FoodItem menu[]);  
+float calculateTotalOrderPrice(Order orders[], int orderCount, FoodItem menu[]);  
+
+int main() {  
+    // Initialize menu items  
+    FoodItem menu[MAX_ITEMS] = {  
+        {1, "Burger", 5.99f},  
+        {2, "Pizza", 8.99f},  
+        {3, "Pasta", 7.49f},  
+        {4, "Salad", 4.99f},  
+        {5, "Soda", 1.99f}  
+    };  
+    
+    Order orders[MAX_ORDERS];  
+    int orderCount = 0;  
+    int choice;  
+
+    do {  
+        printf("\n--- Food Order Management System ---\n");  
+        printf("1. Display Menu\n");  
+        printf("2. Place Order\n");  
+        printf("3. Display Current Orders\n");  
+        printf("4. Exit\n");  
+        printf("Enter your choice: ");  
+
+        // Check for valid input  
+        if (scanf("%d", &choice) != 1) {  
+            while(getchar() != '\n'); // clear input buffer  
+            printf("Invalid input! Please enter a number.\n");  
+            continue;  
+        }  
+
+        switch (choice) {  
+            case 1:  
+                displayMenu(menu, MAX_ITEMS);  
+                break;  
+            case 2:  
+                placeOrder(orders, &orderCount, menu, MAX_ITEMS);  
+                break;  
+            case 3:  
+                displayCurrentOrders(orders, orderCount, menu);  
+                break;  
+            case 4:  
+                printf("Exiting the program. Thank you!\n");  
+                break;  
+            default:  
+                printf("Invalid choice! Please try again.\n");  
+        }  
+    } while (choice != 4);  
+
+    return 0;  
+}  
+
+void displayMenu(FoodItem menu[], int menuSize) {  
+    printf("\n--- Menu ---\n");  
+    for (int i = 0; i < menuSize; i++) {  
+        printf("%d. %s - $%.2f\n", menu[i].id, menu[i].name, menu[i].price);  
+    }  
+}  
+
+void placeOrder(Order orders[], int *orderCount, FoodItem menu[], int menuSize) {  
+    if (*orderCount >= MAX_ORDERS) {  
+        printf("Cannot place more orders. Limit reached.\n");  
+        return;  
+    }  
+
+    int foodItemId, quantity;  
+
+    // Input validation for food item ID and quantity  
+    while (1) {  
+        printf("Enter food item ID: ");  
+        if (scanf("%d", &foodItemId) != 1 || foodItemId < 1 || foodItemId > menuSize) {  
+            while (getchar() != '\n'); // Clear invalid input  
+            printf("Invalid food item ID. Please try again.\n");  
+            continue; // Prompt again  
+        }  
+        
+        printf("Enter quantity: ");  
+        if (scanf("%d", &quantity) != 1 || quantity < 1) {  
+            while (getchar() != '\n'); // Clear invalid input  
+            printf("Invalid quantity. Please enter a positive number.\n");  
+            continue; // Prompt again  
+        }  
+        break; // Valid input, exit loop  
+    }  
+
+    orders[*orderCount] = (Order){foodItemId, quantity};  
+    (*orderCount)++;  
+    printf("Order placed successfully!\n");  
+}  
+
+void displayCurrentOrders(Order orders[], int orderCount, FoodItem menu[]) {  
+    if (orderCount == 0) {  
+        printf("No current orders.\n");  
+        return;  
+    }  
+
+    printf("\n--- Current Orders ---\n");  
+    for (int i = 0; i < orderCount; i++) {  
+        printf("Order %d: Food Item '%s' (ID: %d), Quantity: %d\n",   
+            i + 1, menu[orders[i].foodItemId - 1].name,   
+            orders[i].foodItemId, orders[i].quantity);  
+    }  
+
+    float totalPrice = calculateTotalOrderPrice(orders, orderCount, menu);  
+    printf("Total Price: $%.2f\n", totalPrice);  
+}  
+
+float calculateTotalOrderPrice(Order orders[], int orderCount, FoodItem menu[]) {  
+    float total = 0.0;  
+    for (int i = 0; i < orderCount; i++) {  
+        total += menu[orders[i].foodItemId - 1].price * orders[i].quantity;  
+    }  
+    return total;  
+}
